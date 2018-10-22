@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("MissingPermission")
     private void getActivity() {
+
         Task<PlaceLikelihoodBufferResponse> placeResult = placeDetectionClient.
                 getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
