@@ -56,6 +56,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ButtonMap.setOnClickListener(this);
         LocationText = findViewById(R.id.location_tv);
         PlacesListView = findViewById(R.id.list_places);
+        
+        //Obtiene mes,día,hora del móvil
+        Calendar calendar = Calendar.getInstance();
+        String currentDate = DateFormat.getDateTimeInstance().format(calendar.getTime()).toString();
+        Date today = Calendar.getInstance().getTime();
+        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+
+        String time = DateFormat.getTimeInstance().format(calendar.getTime());
+        String day = DateFormat.getDateInstance().format(calendar.getTime());
+
+        String theDate = calendar.get(Calendar.MONTH) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.get(Calendar.YEAR) + " " + calendar.get(Calendar.HOUR) + " " + calendar.get(Calendar.AM_PM);
+
+        String mes = calendar.get(Calendar.MONTH)+ ""; //0-11
+        String año = calendar.get(Calendar.YEAR)+ "";
+        String dia = calendar.get(Calendar.DAY_OF_MONTH)+ "";
+        String hora = calendar.get(Calendar.HOUR_OF_DAY)+ ""; //HOUR = 6 HoUR_OF_DAY = 18
+        String am_pm = calendar.get(Calendar.AM_PM)+ ""; //0 if AM, 1 if PM
+
+        TextView textViewDate = findViewById(R.id.texto);
+        textViewDate.setText(theDate);
+        //FIN
 
         // Acquire a reference to the system Location Manager
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
