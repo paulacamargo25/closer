@@ -23,6 +23,7 @@ import android.util.Log;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceFilter;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
@@ -31,8 +32,9 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.Calendar;
+import java.util.Date;
+import java.text.DateFormat;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -67,15 +69,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String day = DateFormat.getDateInstance().format(calendar.getTime());
 
         String theDate = calendar.get(Calendar.MONTH) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.get(Calendar.YEAR) + " " + calendar.get(Calendar.HOUR) + " " + calendar.get(Calendar.AM_PM);
-
         String mes = calendar.get(Calendar.MONTH)+ ""; //0-11
         String año = calendar.get(Calendar.YEAR)+ "";
         String dia = calendar.get(Calendar.DAY_OF_MONTH)+ "";
         String hora = calendar.get(Calendar.HOUR_OF_DAY)+ ""; //HOUR = 6 HoUR_OF_DAY = 18
         String am_pm = calendar.get(Calendar.AM_PM)+ ""; //0 if AM, 1 if PM
 
-        TextView textViewDate = findViewById(R.id.texto);
-        textViewDate.setText(theDate);
         //FIN
 
         // Acquire a reference to the system Location Manager
@@ -121,9 +120,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("MissingPermission")
     private void getActivity() {
+        ArrayList<String> filters = new ArrayList<>();
+        filters.add(Place.TYPE_UNIVERSITY+"");
+
+        PlaceFilter placeFilter = new PlaceFilter(false, filters);
 
         Task<PlaceLikelihoodBufferResponse> placeResult = placeDetectionClient.
-                getCurrentPlace(null);
+                getCurrentPlace(placeFilter);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
@@ -131,12 +134,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 List<String> placesList = new ArrayList<>();
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+
+                    placesList.add(placeLikelihood.getPlace().freeze().getPlaceTypes().toString());
                 }
                 likelyPlaces.release();
                 ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
                 PlacesListView.setAdapter(arrayAdapter);
-
             }
         });
     }
