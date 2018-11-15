@@ -31,13 +31,14 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap = null;
     private TextView LocationText;
     private LatLng placeLocation;
-    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc");
+    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc").setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS).setWriteTimeout(1, TimeUnit.SECONDS);
     GoogleApiClient mGoogleApiClient;
     public static final String TAG = "MyPosition";
 
