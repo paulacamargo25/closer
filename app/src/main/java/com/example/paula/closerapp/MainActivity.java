@@ -34,8 +34,9 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.Calendar;
+import java.util.Date;
+import java.text.DateFormat;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ListView PlacesListView;
     private double longitude;
     private double latitude;
+    private Location last;
 
     public static final String TAG = "CurrentLocNearByPlaces";
     private static final int LOC_REQ_CODE = 1;
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ButtonMap.setOnClickListener(this);
         LocationText = findViewById(R.id.location_tv);
         PlacesListView = findViewById(R.id.list_places);
+
 
         // Acquire a reference to the system Location Manager
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         String locationProvider = LocationManager.NETWORK_PROVIDER;
-        Location last = locationManager.getLastKnownLocation(locationProvider);
+        last = locationManager.getLastKnownLocation(locationProvider);
         LocationText.setText(last.toString());
         getActivity();
 
@@ -103,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @SuppressLint("MissingPermission")
     private void getActivity() {
-
-
         PlaceFilter placeFilter = new PlaceFilter(false, null);
 
         Task<PlaceLikelihoodBufferResponse> placeResult = placeDetectionClient.
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                         intent.putExtra("PLACE_LOCATION", placesLocations.get(position));
+                        intent.putExtra("MY_LOCATION", last);
                         startActivity(intent);
                     }
                 });

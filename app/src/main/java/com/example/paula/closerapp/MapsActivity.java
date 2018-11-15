@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -34,10 +35,13 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap = null;
+    private TextView LocationText;
     private LatLng placeLocation;
-    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyDJ2gXU3ugpZ9zwV4qVBmEne4brIKns3GE");;
+    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc");
     GoogleApiClient mGoogleApiClient;
     public static final String TAG = "MyPosition";
+
+    private Location currentLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +52,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         placeLocation = getIntent().getExtras().getParcelable("PLACE_LOCATION");
+        currentLocation = getIntent().getExtras().getParcelable("MY_LOCATION");
+        LocationText = findViewById(R.id.location_tv);
 
     }
 
@@ -81,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(), location.getLongitude()), 16));
+            currentLocation = location;
         }
     }
 
@@ -95,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Location Permission already granted
                 //buildGoogleApiClient();
                 mMap.setMyLocationEnabled(true);
+
             } else {
                 //Request Location Permission
                 //checkLocationPermission();
@@ -103,11 +111,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         else {
             //buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
+
         }
 
         mMap.setMyLocationEnabled(true);
+
         LocationManager locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
-        Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         LatLng current = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         googleMap.addMarker(new MarkerOptions().position(current).title("Marker Label").snippet("Marker Description"));
@@ -121,6 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .origin(new com.google.maps.model.LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
                     .destination(new com.google.maps.model.LatLng(placeLocation.latitude, placeLocation.longitude)).departureTime(now).await();
             List<LatLng> decodedPath = PolyUtil.decode(result.routes[0].overviewPolyline.getEncodedPath());
+            Log.d(TAG, result.routes[0].summary);
             mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
 
         } catch (ApiException e) {
