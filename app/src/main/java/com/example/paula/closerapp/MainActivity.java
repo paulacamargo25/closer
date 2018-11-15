@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
@@ -23,9 +24,11 @@ import android.util.Log;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceFilter;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -101,22 +104,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("MissingPermission")
     private void getActivity() {
 
+
+        PlaceFilter placeFilter = new PlaceFilter(false, null);
+
         Task<PlaceLikelihoodBufferResponse> placeResult = placeDetectionClient.
-                getCurrentPlace(null);
+                getCurrentPlace(placeFilter);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
                 Log.d(TAG, "current location places info");
                 List<String> placesList = new ArrayList<>();
+                final List<LatLng> placesLocations = new ArrayList<>();
+
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+                    for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
+                        if (placeType == Place.TYPE_RESTAURANT) {
+                            placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+                            placesLocations.add(placeLikelihood.getPlace().freeze().getLatLng());
+                        }
+                    }
                 }
                 likelyPlaces.release();
                 ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
                 PlacesListView.setAdapter(arrayAdapter);
-
+                PlacesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                        intent.putExtra("PLACE_LOCATION", placesLocations.get(position));
+                        startActivity(intent);
+                    }
+                });
             }
+
         });
     }
 
