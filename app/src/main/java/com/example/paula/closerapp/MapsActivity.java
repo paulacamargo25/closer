@@ -1,12 +1,16 @@
 package com.example.paula.closerapp;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -43,6 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final String TAG = "MyPosition";
 
     private Location currentLocation;
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         placeLocation = getIntent().getExtras().getParcelable("PLACE_LOCATION");
         currentLocation = getIntent().getExtras().getParcelable("MY_LOCATION");
         LocationText = findViewById(R.id.location_tv);
+
+        button = findViewById(R.id.startButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startNav();
+            }
+        });
+
+    }
+
+    private  void startNav(){
+
+        String location = Double.toString(placeLocation.latitude) + "," + Double.toString(placeLocation.longitude);
+        Uri gmmIntentUri = Uri.parse("google.navigation:q="+location);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+        startActivity(mapIntent);
+        Log.d(TAG, "CLICK");
 
     }
 
