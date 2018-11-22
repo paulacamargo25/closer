@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,10 +40,10 @@ import java.util.concurrent.TimeUnit;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
-    private GoogleMap mMap = null;
+    private GoogleMap mMap = null; //AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc
     private TextView LocationText;
     private LatLng placeLocation;
-    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc").setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS).setWriteTimeout(1, TimeUnit.SECONDS);
+    private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyBcen-GcSQZ7aomtHGZLX7zUtZgpLaQj4s").setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS).setWriteTimeout(1, TimeUnit.SECONDS);
     GoogleApiClient mGoogleApiClient;
     public static final String TAG = "MyPosition";
 
