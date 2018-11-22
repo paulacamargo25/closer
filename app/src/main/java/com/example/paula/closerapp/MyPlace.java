@@ -2,14 +2,10 @@ package com.example.paula.closerapp;
 
 public class MyPlace {
 
-    // Store the id of the  movie poster
     private int mImageDrawable;
-    // Store the name of the movie
     private String mName;
-    // Store the release date of the movie
     private String mAddress;
 
-    // Constructor that is used to create an instance of the Movie object
     public MyPlace(int mImageDrawable, String mName, String mAddress) {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
