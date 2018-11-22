@@ -39,6 +39,16 @@
                 android:textStyle="bold"
                 android:textSize="22dp" />
 
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView"
+                android:maxLines="3"
+                android:padding="8dp"
+                android:textColor="#222"
+                android:textSize="20dp" />
+
 
         </RelativeLayout>
 

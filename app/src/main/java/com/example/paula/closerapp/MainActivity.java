@@ -114,21 +114,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
                 Log.d(TAG, "current location places info");
-                List<String> placesList = new ArrayList<>();
+                ArrayList<MyPlace> placesList = new ArrayList<>();
+
                 final List<LatLng> placesLocations = new ArrayList<>();
 
                 PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
                     for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
                         if (placeType == Place.TYPE_RESTAURANT) {
-                            placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+                            placesList.add(new MyPlace(R.drawable.googleplaces, placeLikelihood.getPlace().freeze().getName().toString() , placeLikelihood.getPlace().freeze().getAddress().toString()));
                             placesLocations.add(placeLikelihood.getPlace().freeze().getLatLng());
                         }
                     }
                 }
                 likelyPlaces.release();
-                ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
-                PlacesListView.setAdapter(arrayAdapter);
+
+                PlaceAdapter adapter = new PlaceAdapter(MainActivity.this, placesList);
+
+                PlacesListView.setAdapter(adapter);
+
                 PlacesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
