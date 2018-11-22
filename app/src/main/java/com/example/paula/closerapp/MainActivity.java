@@ -44,6 +44,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
 
+//Dani
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button ButtonMap;
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double longitude;
     private double latitude;
     private Location last;
+    //Dani
+    private Spinner spinner;
+    private static final String[] paths = {"item 1", "item 2", "item 3"};
 
     public static final String TAG = "CurrentLocNearByPlaces";
     private static final int LOC_REQ_CODE = 1;
@@ -67,6 +74,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ButtonMap.setOnClickListener(this);
         LocationText = findViewById(R.id.location_tv);
         PlacesListView = findViewById(R.id.list_places);
+        
+        //Spinner Seleccionar Opcion para Filtro
+        setContentView(R.layout.spinner);
+        spinner = (Spinner)findViewById(R.id.spinner1);
+        ArrayAdapter<String>adapter = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item,paths);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        String optionSelected = spinner.getSelectedItem().toString();
+
 
 
         // Acquire a reference to the system Location Manager
