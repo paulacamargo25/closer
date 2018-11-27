@@ -58,7 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Location last;
     //Dani
     private Spinner spinner;
-    private static final String[] paths = {"item 1", "item 2", "item 3"};
+    //private static final String[] paths = {"item 1", "item 2", "item 3"};
+    private static final List<String> paths = new ArrayList<>();
 
     public static final String TAG = "CurrentLocNearByPlaces";
     private static final int LOC_REQ_CODE = 1;
@@ -70,18 +71,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButtonMap = findViewById(R.id.buttonMap);
-        ButtonMap.setOnClickListener(this);
+        //ButtonMap = findViewById(R.id.buttonMap);
+        //ButtonMap.setOnClickListener(this);
+        paths.add("item 1");
+        paths.add("item 2");
+        paths.add("item 3");
         LocationText = findViewById(R.id.location_tv);
         PlacesListView = findViewById(R.id.list_places);
         
         //Spinner Seleccionar Opcion para Filtro
-        setContentView(R.layout.spinner);
+        //setContentView(R.layout.activity_main);
         spinner = (Spinner)findViewById(R.id.spinner1);
         ArrayAdapter<String>adapter = new ArrayAdapter<String>(MainActivity.this,
-                android.R.layout.simple_spinner_item,paths);
+                android.R.layout.simple_spinner_dropdown_item, paths);
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         String optionSelected = spinner.getSelectedItem().toString();
 
@@ -121,10 +124,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, locationListener);
         String locationProvider = LocationManager.NETWORK_PROVIDER;
         last = locationManager.getLastKnownLocation(locationProvider);
         LocationText.setText(last.toString());
+
         getActivity();
 
     }
@@ -160,35 +164,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PlaceFilter placeFilter = new PlaceFilter(false, null);
 
         Task<PlaceLikelihoodBufferResponse> placeResult = placeDetectionClient.
-                getCurrentPlace(placeFilter);
+                getCurrentPlace(null);
         placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
                 Log.d(TAG, "current location places info");
                 List<String> placesList = new ArrayList<>();
                 final List<LatLng> placesLocations = new ArrayList<>();
+                if (task.isSuccessful()) {
 
-                PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
-                        if (placeType == Place.TYPE_RESTAURANT) {
-                            placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
-                            placesLocations.add(placeLikelihood.getPlace().freeze().getLatLng());
+                    Log.d(TAG, "Places success");
+                    PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+                    for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                        for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
+                            if (placeType == Place.TYPE_RESTAURANT) {
+                                placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+                                placesLocations.add(placeLikelihood.getPlace().freeze().getLatLng());
+                            }
                         }
                     }
+                    likelyPlaces.release();
+                    ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
+                    PlacesListView.setAdapter(arrayAdapter);
+                    PlacesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                            intent.putExtra("PLACE_LOCATION", placesLocations.get(position));
+                            intent.putExtra("MY_LOCATION", last);
+                            startActivity(intent);
+                        }
+                    });
+                } else {
+                    Log.d(TAG, "Places error");
                 }
-                likelyPlaces.release();
-                ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
-                PlacesListView.setAdapter(arrayAdapter);
-                PlacesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                        intent.putExtra("PLACE_LOCATION", placesLocations.get(position));
-                        intent.putExtra("MY_LOCATION", last);
-                        startActivity(intent);
-                    }
-                });
             }
 
         });

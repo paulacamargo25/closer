@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap mMap = null; //AIzaSyD7zKMN1Id_RNcfgy0DAnfOl-yf3UIiUHc
-    private TextView LocationText;
+    private TextView LocationText;//AIzaSyBcen-GcSQZ7aomtHGZLX7zUtZgpLaQj4s
     private LatLng placeLocation;
     private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyBcen-GcSQZ7aomtHGZLX7zUtZgpLaQj4s").setConnectTimeout(1, TimeUnit.SECONDS).setReadTimeout(1, TimeUnit.SECONDS).setWriteTimeout(1, TimeUnit.SECONDS);
     GoogleApiClient mGoogleApiClient;
