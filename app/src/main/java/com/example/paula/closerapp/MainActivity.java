@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -134,29 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void getPhotos(String placeId) {
-        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeId);
-        photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
-                // Get the list of photos.
-                PlacePhotoMetadataResponse photos = task.getResult();
-                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                // Get the first photo in the list.
-                PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                // Get the attribution text.
-                CharSequence attribution = photoMetadata.getAttributions();
-                // Get a full-size bitmap for the photo.
-                Task<PlacePhotoResponse> photoResponse = geoDataClient.getPhoto(photoMetadata);
-                photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                        PlacePhotoResponse photo = task.getResult();
-                        Bitmap bitmap = photo.getBitmap();
-                    }
-                });
-            }
-        });
+
     }
 
     @SuppressLint("MissingPermission")
@@ -169,23 +148,80 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
                 Log.d(TAG, "current location places info");
-                List<String> placesList = new ArrayList<>();
+                final ArrayList<MyPlace> placesList = new ArrayList<>();
+
+                final PlaceAdapter adapter = new PlaceAdapter(MainActivity.this, placesList);
+
                 final List<LatLng> placesLocations = new ArrayList<>();
+
                 if (task.isSuccessful()) {
 
                     Log.d(TAG, "Places success");
                     PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-                    for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                    for (final PlaceLikelihood placeLikelihood : likelyPlaces) {
                         for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
                             if (placeType == Place.TYPE_RESTAURANT) {
-                                placesList.add(placeLikelihood.getPlace().freeze().getName().toString());
+
+                                final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeLikelihood.getPlace().freeze().getId());
+                                final String placeName = placeLikelihood.getPlace().freeze().getName().toString();
+                                final String placeAddress = placeLikelihood.getPlace().freeze().getAddress().toString();
+
+                                Log.d(TAG, "OJO Name: " + placeName);
+                                Log.d(TAG, "OJO Address: " + placeAddress);
+
+                                photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                                        // Get the list of photos.
+                                        PlacePhotoMetadataResponse photos = task.getResult();
+                                        // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                                        PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                                        // Get the first photo in the list.
+                                        if(photoMetadataBuffer.getCount()>0) {
+                                            PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
+                                            // Get the attribution text.
+                                            CharSequence attribution = photoMetadata.getAttributions();
+                                            // Get a full-size bitmap for the photo.
+                                            Task<PlacePhotoResponse> photoResponse = geoDataClient.getPhoto(photoMetadata);
+                                            photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                                    PlacePhotoResponse photo = task.getResult();
+                                                    Bitmap bitmap = photo.getBitmap();
+                                                    Log.d(TAG, "Image Width: " + bitmap.getWidth());
+                                                    Log.d(TAG, "Image Height: " + bitmap.getHeight());
+                                                    Log.d(TAG, "Name: " + placeName);
+                                                    Log.d(TAG, "Address: " + placeAddress);
+
+                                                    placesList.add(new MyPlace(bitmap, placeName, placeAddress));
+                                                    PlacesListView.setAdapter(adapter);
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            Bitmap defaultImage = BitmapFactory.decodeResource(getResources(), R.drawable.googleplaces);
+                                            placesList.add(new MyPlace(defaultImage, placeName, placeAddress));
+                                            PlacesListView.setAdapter(adapter);
+                                        }
+                                        photoMetadataBuffer.release();
+                                    }
+                                });
+
+
+
                                 placesLocations.add(placeLikelihood.getPlace().freeze().getLatLng());
                             }
+
                         }
                     }
                     likelyPlaces.release();
-                    ListAdapter arrayAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.activity_listview, R.id.textView, placesList);
-                    PlacesListView.setAdapter(arrayAdapter);
+
+                    Log.d(TAG, "Size: " + placesList.size());
+
+
+
+                    PlacesListView.setAdapter(adapter);
+
                     PlacesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -198,6 +234,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     Log.d(TAG, "Places error");
                 }
+
+
             }
 
         });
