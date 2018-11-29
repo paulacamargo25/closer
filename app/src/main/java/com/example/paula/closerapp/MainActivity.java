@@ -40,14 +40,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
+import java.util.Map;
 
 //Dani
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
+import org.joda.time.DateTime;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -64,6 +69,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final String TAG = "CurrentLocNearByPlaces";
     private static final int LOC_REQ_CODE = 1;
+    private static  Integer[] monday_1 = new Integer[]{Place.TYPE_BANK, Place.TYPE_SCHOOL, Place.TYPE_GYM, Place.TYPE_CAFE};
+    private static  Integer[] monday_2 = new Integer[]{Place.TYPE_RESTAURANT};
+    private static  Integer[] monday_3 = new Integer[]{};
+    private static  Integer[] tuesday_1 = new Integer[]{Place.TYPE_CAFE, Place.TYPE_SCHOOL, Place.TYPE_GYM};
+    private static  Integer[] tuesday_2 = new Integer[]{Place.TYPE_RESTAURANT };
+    private static  Integer[] tuesday_3 = new Integer[]{};
+    private static  Integer[] wednesday_1 = new Integer[]{Place.TYPE_CAFE, Place.TYPE_SCHOOL, Place.TYPE_GYM};
+    private static  Integer[] wednesday_2 = new Integer[]{Place.TYPE_RESTAURANT};
+    private static  Integer[] wednesday_3 = new Integer[]{};
+    private static  Integer[] thursday_1 = new Integer[]{Place.TYPE_CAFE, Place.TYPE_SCHOOL, Place.TYPE_GYM};
+    private static  Integer[] thursday_2 = new Integer[]{Place.TYPE_RESTAURANT};
+    private static  Integer[] thursday_3 = new Integer[]{Place.TYPE_CAFE, Place.TYPE_SCHOOL, Place.TYPE_GYM};
+    private static  Integer[] friday_1 = new Integer[]{Place.TYPE_CAFE, Place.TYPE_SCHOOL, Place.TYPE_GYM};
+    private static  Integer[] friday_2 = new Integer[]{Place.TYPE_RESTAURANT, Place.TYPE_CAFE};
+    private static  Integer[] friday_3 = new Integer[]{Place.TYPE_CASINO, Place.TYPE_BAR, Place.TYPE_CAFE, Place.TYPE_MEAL_DELIVERY, Place.TYPE_NIGHT_CLUB, Place.TYPE_LIQUOR_STORE};
+    private static  Integer[] saturday_1 = new Integer[]{Place.TYPE_GYM, Place.TYPE_LAUNDRY};
+    private static  Integer[] saturday_2 = new Integer[]{Place.TYPE_RESTAURANT, Place.TYPE_CAFE, Place.TYPE_MOVIE_THEATER, Place.TYPE_CLOTHING_STORE};
+    private static  Integer[] saturday_3 = new Integer[]{Place.TYPE_CASINO, Place.TYPE_BAR, Place.TYPE_CAFE, Place.TYPE_MEAL_DELIVERY, Place.TYPE_NIGHT_CLUB, Place.TYPE_MOVIE_THEATER, Place.TYPE_LIQUOR_STORE};
+    private static  Integer[] sunday_1 = new Integer[]{Place.TYPE_CHURCH, Place.TYPE_PARK, Place.TYPE_LAUNDRY, Place.TYPE_CAFE, Place.TYPE_ZOO, Place.TYPE_SHOPPING_MALL, Place.TYPE_SPA, Place.TYPE_GROCERY_OR_SUPERMARKET, Place.TYPE_VETERINARY_CARE, };
+    private static  Integer[] sunday_2 = new Integer[]{Place.TYPE_CHURCH, Place.TYPE_RESTAURANT, Place.TYPE_CAFE, Place.TYPE_MEAL_DELIVERY, Place.TYPE_MOVIE_THEATER};
+    private static  Integer[] sunday_3 = new Integer[]{Place.TYPE_RESTAURANT, Place.TYPE_MEAL_DELIVERY};
+
+    private static Map<String, Integer[]> monday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> tuesday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> wednesday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> thursday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> friday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> saturday = new HashMap<String, Integer[]>();
+    private Map<String, Integer[]> sunday = new HashMap<String, Integer[]>();
+
+    private Map<String, Map<String, Integer[]> > placesTypes = new HashMap<String, Map<String, Integer[]>>();
+
 
     protected GeoDataClient geoDataClient;
     protected PlaceDetectionClient placeDetectionClient;
@@ -79,7 +116,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         paths.add("item 3");
         LocationText = findViewById(R.id.location_tv);
         PlacesListView = findViewById(R.id.list_places);
-        
+
+        monday.put("man", monday_1);
+        monday.put("tar", monday_2);
+        monday.put("noc", monday_3);
+        tuesday.put("man", tuesday_1);
+        tuesday.put("tar", tuesday_2);
+        tuesday.put("noc", tuesday_3);
+        wednesday.put("man", wednesday_1);
+        wednesday.put("tar", wednesday_2);
+        wednesday.put("noc", wednesday_3);
+        thursday.put("man", thursday_1);
+        thursday.put("tar", thursday_2);
+        thursday.put("noc", thursday_3);
+        friday.put("man", friday_1);
+        friday.put("tar", friday_2);
+        friday.put("noc", friday_3);
+        saturday.put("man", saturday_1);
+        saturday.put("tar", saturday_2);
+        saturday.put("noc", saturday_3);
+        sunday.put("man", sunday_1);
+        sunday.put("tar", sunday_2);
+        sunday.put("noc", sunday_3);
+
+        placesTypes.put("monday", monday);
+        placesTypes.put("tuesday", tuesday);
+        placesTypes.put("wednesday", wednesday);
+        placesTypes.put("thursday", thursday);
+        placesTypes.put("friday", friday);
+        placesTypes.put("saturday", saturday);
+        placesTypes.put("sunday", sunday);
+
+        placesTypes.get("monday").get("man");
+
         //Spinner Seleccionar Opcion para Filtro
         //setContentView(R.layout.activity_main);
         spinner = (Spinner)findViewById(R.id.spinner1);
@@ -160,8 +229,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
                     for (final PlaceLikelihood placeLikelihood : likelyPlaces) {
                         for (int placeType : placeLikelihood.getPlace().freeze().getPlaceTypes()) {
-                            if (placeType == Place.TYPE_RESTAURANT) {
-
+                            List<Integer> listPlacesTypes = Arrays.asList(placesTypes.get("tuesday").get("man"));
+//                            if (placeType == Place.TYPE_RESTAURANT) {
+                            if(listPlacesTypes.contains(placeType)){
                                 final Task<PlacePhotoMetadataResponse> photoMetadataResponse = geoDataClient.getPlacePhotos(placeLikelihood.getPlace().freeze().getId());
                                 final String placeName = placeLikelihood.getPlace().freeze().getName().toString();
                                 final String placeAddress = placeLikelihood.getPlace().freeze().getAddress().toString();
